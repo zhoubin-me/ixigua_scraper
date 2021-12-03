@@ -33,7 +33,10 @@ print(title_dict)
 
 
 def download_video(title, html_url):
-    if os.path.exists("D:\\Colorful\\" + title + '.mp4'):
+    mp4_file = "D:\\Colorful\\" + title + '.mp4'
+    mp4_tmp = "D:\\Colorful\\" + title + '_.mp4'
+    mp3_file = 'D:\\Colorful\\' + title + '.mp3'
+    if os.path.exists(mp4_file):
         return
     driver = webdriver.Chrome(executable_path=ChromeDriverManager().install(), options=chrome_options)
     driver.get(html_url)
@@ -77,15 +80,14 @@ def download_video(title, html_url):
     driver.close()
     del driver
     print(title)
-    wget.download(max_audio_link, out='D:\\Colorful\\' + title + '.mp3')
+    wget.download(max_audio_link, out=mp3_file)
     print(title)
-    wget.download(max_video_link, out='D:\\Colorful\\' + title + '_.mp4')
+    wget.download(max_video_link, out=mp4_tmp)
 
-    if os.path.exists('D:\\Colorful\\' + title + '_.mp4') and os.path.exists('D:\\Colorful\\' + title + '.mp3'):
-        os.system(f'ffmpeg -i "D:\\Colorful\\{title}_.mp4" -i "D:\\Colorful\\{title}.mp3" -c copy "D:\\Colorful\\{title}.mp4"')
-        os.remove('D:\\Colorful\\' + title + '.mp3')
-        os.remove('D:\\Colorful\\' + title + '_.mp4')
-
+    if os.path.exists(mp4_tmp) and os.path.exists(mp3_file):
+        os.system(f'ffmpeg -i "{mp4_tmp}" -i "{mp3_file}" -c copy "{mp4_file}"')
+        os.remove(mp4_tmp)
+        os.remove(mp3_file)
 
 while True:
     for html_url, title in title_dict.items():
