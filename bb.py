@@ -1,8 +1,4 @@
-import shutil
-import time
 import os
-import re
-import requests
 # from selenium import webdriver
 from seleniumwire import webdriver
 from selenium.webdriver.chrome.options import Options
@@ -10,34 +6,18 @@ from seleniumwire.request import Response
 from webdriver_manager.chrome import ChromeDriverManager
 import wget
 from videoprops import get_video_properties
-
+import multiprocessing as mp
 # html_url = 'https://www.ixigua.com/7036308375272948236'
-
-
-chrome_options = Options()
-chrome_options.add_argument('--headless')
-chrome_options.add_argument('--user_agent="Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_6) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/12.0.3 Safari/605.1.15"')
-
-
-title_dict = {}
-
-with open('vlist.txt', 'r', encoding='utf-8') as f:
-    lines = f.readlines()
-    for line in lines:
-        title, url = line.split('\t')
-        url = 'https://www.ixigua.com' + url.strip()
-        title = title.strip()
-        title_dict[url] = title
-
-print(title_dict)
-
 
 def download_video(title, html_url):
     mp4_file = "D:\\Colorful\\" + title + '.mp4'
     mp4_tmp = "D:\\Colorful\\" + title + '_.mp4'
     mp3_file = 'D:\\Colorful\\' + title + '.mp3'
     if os.path.exists(mp4_file):
-        return
+        return "Exists"
+    chrome_options = Options()
+    chrome_options.add_argument('--headless')
+    chrome_options.add_argument('--user_agent="Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_6) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/12.0.3 Safari/605.1.15"')
     driver = webdriver.Chrome(executable_path=ChromeDriverManager().install(), options=chrome_options)
     driver.get(html_url)
     driver.implicitly_wait(5)
@@ -79,19 +59,64 @@ def download_video(title, html_url):
         print("=" * 20)
     driver.close()
     del driver
-    print(title)
-    wget.download(max_audio_link, out=mp3_file)
-    print(title)
-    wget.download(max_video_link, out=mp4_tmp)
+    try:
+        print(title)
+        wget.download(max_audio_link, out=mp3_file)
+        print(title)
+        wget.download(max_video_link, out=mp4_tmp)
+    except:
+        print(max_audio_link, max_video_link)
 
     if os.path.exists(mp4_tmp) and os.path.exists(mp3_file):
         os.system(f'ffmpeg -i "{mp4_tmp}" -i "{mp3_file}" -c copy "{mp4_file}"')
         os.remove(mp4_tmp)
         os.remove(mp3_file)
+    
+    return "Done"
 
-while True:
-    for html_url, title in title_dict.items():
-        try:
-            download_video(title, html_url)
-        except:
-            pass
+
+
+
+if __name__ == '__main__':
+    title_dict = {}
+
+    with open('vlist.txt', 'r', encoding='utf-8') as f:
+        lines = f.readlines()
+        for line in lines:
+            title, url = line.split('\t')
+            url = 'https://www.ixigua.com' + url.strip()
+            title = title.strip()
+            title_dict[url] = title
+
+    print(title_dict)
+
+    proceses = []
+    count = 0
+    items = list(title_dict.items())
+    while True:
+        if len(proceses) < 4:
+            url, title = items[count]
+            p = mp.Process(target=download_video, args=(title, url))
+            proceses.append(p)
+            p.start()
+            count += 1
+
+        for idx, p in enumerate(proceses):
+            if not p.is_alive():
+                proceses.pop(idx)
+                p.join()
+                break
+
+        if count == len(items):
+            break   
+
+    for p in proceses:
+        p.join()
+
+# def main():
+#     while True:
+#         for html_url, title in title_dict.items():
+#             try:
+#                 download_video(title, html_url)
+#             except:
+#                 pass
