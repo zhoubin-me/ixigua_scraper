@@ -7,28 +7,18 @@
 #     https://docs.scrapy.org/en/latest/topics/downloader-middleware.html
 #     https://docs.scrapy.org/en/latest/topics/spider-middleware.html
 
-from shutil import which
 
 BOT_NAME = 'ixigua'
 
 SPIDER_MODULES = ['ixigua.spiders']
 NEWSPIDER_MODULE = 'ixigua.spiders'
-SPLASH_URL = 'http://0.0.0.0:8050'
 
-HTTPCACHE_STORAGE = 'scrapy_splash.SplashAwareFSCacheStorage'
-DUPEFILTER_CLASS = 'scrapy_splash.SplashAwareDupeFilter'
-
-
-
-SELENIUM_DRIVER_NAME = 'google-chrome'
-SELENIUM_DRIVER_EXECUTABLE_PATH = which('chromewrider')
-SELENIUM_DRIVER_ARGUMENTS=['-headless']  # '--headless' if using chrome instead of firefox
 
 # Crawl responsibly by identifying yourself (and your website) on the user-agent
 #USER_AGENT = 'ixigua (+http://www.yourdomain.com)'
 
 # Obey robots.txt rules
-ROBOTSTXT_OBEY = False
+ROBOTSTXT_OBEY = True
 
 # Configure maximum concurrent requests performed by Scrapy (default: 16)
 #CONCURRENT_REQUESTS = 32
@@ -67,11 +57,7 @@ DOWNLOAD_TIMEOUT = 3600
 DOWNLOADER_MIDDLEWARES = {
     'ixigua.middlewares.IxiguaDownloaderMiddleware': 543,
     'scrapy.downloadermiddlewares.useragent.UserAgentMiddleware': None,
-    'scrapy_user_agents.middlewares.RandomUserAgentMiddleware': 400,
-    'scrapy_splash.SplashCookiesMiddleware': 723,
-    'scrapy_splash.SplashMiddleware': 725,
     'scrapy.downloadermiddlewares.httpcompression.HttpCompressionMiddleware': 810,
-    'scrapy_selenium.SeleniumMiddleware': 800
 }
 
 # Enable or disable extensions

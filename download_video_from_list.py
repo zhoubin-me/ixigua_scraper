@@ -1,5 +1,4 @@
 import os
-# from selenium import webdriver
 from seleniumwire import webdriver
 from selenium.webdriver.chrome.options import Options
 from seleniumwire.request import Response
@@ -7,12 +6,22 @@ from webdriver_manager.chrome import ChromeDriverManager
 import wget
 from videoprops import get_video_properties
 import multiprocessing as mp
-# html_url = 'https://www.ixigua.com/7036308375272948236'
+
+"""
+The audio and video files are seperated. To combine them, you need to install and use FFMPEG.
+For Windows users, you need to install media pack so that ffmpeg can run properly.
+Find your build version of windows, and download related media pack here: 
+https://support.microsoft.com/en-us/topic/media-feature-pack-list-for-windows-n-editions-c1c6fffa-d052-8338-7a79-a4bb980a700a
+"""
+
+DOWNLOAD_FOLDER = "D:\\Colorful\\"
+NUM_PROC = 4
+LIST_FILE = "vlist.txt"
 
 def download_video(title, html_url):
-    mp4_file = "D:\\Colorful\\" + title + '.mp4'
-    mp4_tmp = "D:\\Colorful\\" + title + '_.mp4'
-    mp3_file = 'D:\\Colorful\\' + title + '.mp3'
+    mp4_file = DOWNLOAD_FOLDER + title + '.mp4'
+    mp4_tmp = DOWNLOAD_FOLDER + title + '_.mp4'
+    mp3_file = DOWNLOAD_FOLDER + title + '.mp3'
     if os.path.exists(mp4_file):
         return "Exists"
     chrome_options = Options()
@@ -80,9 +89,11 @@ def download_video(title, html_url):
 if __name__ == '__main__':
     title_dict = {}
 
-    with open('vlist.txt', 'r', encoding='utf-8') as f:
+    with open(LIST_FILE, 'r', encoding='utf-8') as f:
         lines = f.readlines()
         for line in lines:
+            if len(line.strip()) == 0:
+                continue
             title, url = line.split('\t')
             url = 'https://www.ixigua.com' + url.strip()
             title = title.strip()
@@ -94,7 +105,7 @@ if __name__ == '__main__':
     count = 0
     items = list(title_dict.items())
     while True:
-        if len(proceses) < 4:
+        if len(proceses) < NUM_PROC:
             url, title = items[count]
             p = mp.Process(target=download_video, args=(title, url))
             proceses.append(p)
@@ -113,10 +124,3 @@ if __name__ == '__main__':
     for p in proceses:
         p.join()
 
-# def main():
-#     while True:
-#         for html_url, title in title_dict.items():
-#             try:
-#                 download_video(title, html_url)
-#             except:
-#                 pass
