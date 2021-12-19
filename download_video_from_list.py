@@ -14,7 +14,7 @@ Find your build version of windows, and download related media pack here:
 https://support.microsoft.com/en-us/topic/media-feature-pack-list-for-windows-n-editions-c1c6fffa-d052-8338-7a79-a4bb980a700a
 """
 
-DOWNLOAD_FOLDER = "D:\\Colorful\\"
+DOWNLOAD_FOLDER = "D:\\Colorful_Update\\"
 NUM_PROC = 4
 LIST_FILE = "vlist.txt"
 
@@ -29,9 +29,9 @@ def download_video(title, html_url):
     chrome_options.add_argument('--user_agent="Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_6) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/12.0.3 Safari/605.1.15"')
     driver = webdriver.Chrome(executable_path=ChromeDriverManager().install(), options=chrome_options)
     driver.get(html_url)
-    driver.implicitly_wait(5)
+    driver.implicitly_wait(9)
     elems = driver.find_elements_by_xpath('//div[@class="commentList"]')
-    print(elems)
+    print(title)
 
     video_links = {}
     max_video_size = -1
@@ -69,12 +69,14 @@ def download_video(title, html_url):
     driver.close()
     del driver
     try:
-        print(title)
+        mp3_file = mp3_file.replace('?', '')
+        mp4_tmp = mp4_tmp.replace('?', '')
+        mp4_file = mp4_file.replace('?', '')
         wget.download(max_audio_link, out=mp3_file)
-        print(title)
         wget.download(max_video_link, out=mp4_tmp)
-    except:
-        print(max_audio_link, max_video_link)
+    except Exception as e:
+        print(e)
+        print("Download Error", max_audio_link, max_video_link)
 
     if os.path.exists(mp4_tmp) and os.path.exists(mp3_file):
         os.system(f'ffmpeg -i "{mp4_tmp}" -i "{mp3_file}" -c copy "{mp4_file}"')
@@ -86,7 +88,7 @@ def download_video(title, html_url):
 
 
 
-if __name__ == '__main__':
+def main():
     title_dict = {}
 
     with open(LIST_FILE, 'r', encoding='utf-8') as f:
@@ -124,3 +126,5 @@ if __name__ == '__main__':
     for p in proceses:
         p.join()
 
+if __name__ == '__main__':
+    main()

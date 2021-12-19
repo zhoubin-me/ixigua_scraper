@@ -3,8 +3,9 @@ from videoprops import get_video_properties
 import glob
 import tqdm
 import os
-
-fs = glob.glob('D:\\Colorful\\*.mp4')
+FOLDER = "Colorful_Update"
+path = os.path.join("D:", FOLDER, '*.mp4')
+fs = glob.glob(path)
 dims = defaultdict(list)
 for f in tqdm.tqdm(fs):
     props = get_video_properties(f)
